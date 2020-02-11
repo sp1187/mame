@@ -3545,10 +3545,19 @@ void mips3_device::handle_special(uint32_t op)
 		case 0x18:  /* MULT */      handle_mult(op);                                                break;
 		case 0x19:  /* MULTU */     handle_multu(op);                                               break;
 		case 0x1a:  /* DIV */
-			if (RTVAL32)
+			if (RSVAL32 == INT32_MIN && RTVAL32 == -1)
+			{
+				LOVAL64 = (int32_t)RSVAL32;
+				HIVAL64 = (int32_t)0;
+			}
+			else if (RTVAL32)
 			{
 				LOVAL64 = (int32_t)((int32_t)RSVAL32 / (int32_t)RTVAL32);
 				HIVAL64 = (int32_t)((int32_t)RSVAL32 % (int32_t)RTVAL32);
+			}
+			else {
+				LOVAL64 = (int32_t)((int32_t)RSVAL32 < 0 ? 1 : -1);
+				HIVAL64 = (int32_t)RSVAL32;
 			}
 			m_core->icount -= 35;
 			break;
@@ -3557,6 +3566,10 @@ void mips3_device::handle_special(uint32_t op)
 			{
 				LOVAL64 = (int32_t)(RSVAL32 / RTVAL32);
 				HIVAL64 = (int32_t)(RSVAL32 % RTVAL32);
+			}
+			else {
+				LOVAL64 = (int32_t)-1;
+				HIVAL64 = (int32_t)RSVAL32;
 			}
 			m_core->icount -= 35;
 			break;
@@ -3569,10 +3582,19 @@ void mips3_device::handle_special(uint32_t op)
 			m_core->icount -= 7;
 			break;
 		case 0x1e:  /* DDIV */
-			if (RTVAL64)
+			if (RSVAL64 == INT64_MIN && RTVAL64 == -1)
+			{
+				LOVAL64 = (int64_t)RSVAL64;
+				HIVAL64 = (int64_t)0;
+			}
+			else if (RTVAL64)
 			{
 				LOVAL64 = (int64_t)RSVAL64 / (int64_t)RTVAL64;
 				HIVAL64 = (int64_t)RSVAL64 % (int64_t)RTVAL64;
+			}
+			else {
+				LOVAL64 = (int64_t)RSVAL64 < 0 ? 1 : -1;
+				HIVAL64 = (int64_t)RSVAL64;
 			}
 			m_core->icount -= 67;
 			break;
@@ -3581,6 +3603,10 @@ void mips3_device::handle_special(uint32_t op)
 			{
 				LOVAL64 = RSVAL64 / RTVAL64;
 				HIVAL64 = RSVAL64 % RTVAL64;
+			}
+			else {
+				LOVAL64 = -1;
+				HIVAL64 = RSVAL64;
 			}
 			m_core->icount -= 67;
 			break;
